@@ -47,7 +47,6 @@ object SparkProvider {
   // can also set .master here but should be in conf
    lazy val sparkContext: SparkSession = SparkSession.builder()
     .config(conf)
-    .enableHiveSupport()
     .getOrCreate()
 
   val incrementalId = new AtomicInteger()

@@ -18,7 +18,10 @@ object ElasticSearchWriter {
 
   val sparkConf: Map[String, String] = Map(
     "es.net.http.auth.user" -> username,
-    "es.net.http.auth.pass" -> password
+    "es.net.http.auth.pass" -> password,
+    "es.batch.size.entries"    -> "100",
+    "es.batch.size.bytes"      -> "512kb",
+    "es.batch.write.refresh"   -> "false"
   )
 
   /**
