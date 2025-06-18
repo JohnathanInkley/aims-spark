@@ -42,3 +42,38 @@ java \
   -Dconfig.file=application.conf \
   -jar batch/target/scala-2.13/ons-ai-batch-assembly-0.0.1.jar
 
+# Get index name
+index_name=$(curl -s -X GET "localhost:9200/_alias" | jq -r 'keys[0]')
+
+echo "Detected index: $index_name"
+
+# Check if index_name is non-empty
+if [ -z "$index_name" ]; then
+  echo "No index name found. Exiting."
+  exit 1
+fi
+
+# Create alias JSON with the index name filled in
+alias_payload=$(cat <<EOF
+{
+  "actions": [
+    { "add": { "index": "$index_name", "alias": "index_full_hist_current" } },
+    { "add": { "index": "$index_name", "alias": "index_full_nohist_current" } },
+    { "add": { "index": "$index_name", "alias": "index_full_hist_111" } },
+    { "add": { "index": "$index_name", "alias": "index_full_nohist_111" } },
+    { "add": { "index": "$index_name", "alias": "index_skinny_hist_current" } },
+    { "add": { "index": "$index_name", "alias": "index_skinny_nohist_current" } },
+    { "add": { "index": "$index_name", "alias": "index_skinny_hist_111" } },
+    { "add": { "index": "$index_name", "alias": "index_skinny_nohist_111" } }
+  ]
+}
+EOF
+)
+
+# Post aliases to Elasticsearch
+echo "Creating aliases..."
+curl -s -X POST "localhost:9200/_aliases" \
+  -H 'Content-Type: application/json' \
+  -d "$alias_payload" | jq .
+
+echo "Aliases created for index: $index_name"
